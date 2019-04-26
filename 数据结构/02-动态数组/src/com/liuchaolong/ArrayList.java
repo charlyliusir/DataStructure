@@ -26,6 +26,9 @@ public class ArrayList<E> {
 	 * 清除所有元素
 	 */
 	public void clear() {
+		for (int i = 0; i < size; i++) {
+			elements[i] = null;
+		}
 		size = 0;
 	}
 	
@@ -59,7 +62,7 @@ public class ArrayList<E> {
 	 * @param element
 	 */
 	public void add(E element) {
-		elements[size++] = element;
+		add(size, element);
 	}
 	
 	/**
@@ -68,9 +71,7 @@ public class ArrayList<E> {
 	 * @return
 	 */
 	public E get(int index) {
-		if (index < 0 || index >= size) {
-			throw new IndexOutOfBoundsException("Index:" + index + ", Size" + size);
-		}
+		rangeCheck(index);
 		return elements[index];
 	}
 	
@@ -92,7 +93,15 @@ public class ArrayList<E> {
 	 * @param element
 	 */
 	public void add(int index, E element) {
+		rangeCheckForAdd(index);
 		
+		ensureCapacity(size + 1); // 至少保证size+1容量
+		
+		for (int i = size; i > index; i--) {
+			elements[i] = elements[i - 1];
+		}
+		elements[index] = element;
+		size ++;
 	}
 	
 	/**
@@ -101,7 +110,13 @@ public class ArrayList<E> {
 	 * @return
 	 */
 	public E remove(int index) {
-		return null;
+		rangeCheck(index);
+		E oldElementE = elements[index];
+		for (int i = index + 1; i < size; i++) {
+			elements[i - 1] = elements[i];
+		}
+		elements[--size] = null;
+		return oldElementE;
 	}
 	
 	/**
@@ -110,12 +125,20 @@ public class ArrayList<E> {
 	 * @return
 	 */
 	public int indexOf(E element) {
+		if (element == null) {
 		for (int i = 0; i < size; i++) {
-			if (elements[i] == element) return -1;
+			if (elements[i] == null) return i;
 		}
+		} else {
+			for (int i = 0; i < size; i++) {
+				if (element.equals(elements[i])) return i;
+			}
+		}
+		
 		return ELEMENT_NOT_FOUND;
 	}
 	
+
 	@Override
 	public String toString() {
 		// TODO Auto-generated method stub
@@ -130,6 +153,40 @@ public class ArrayList<E> {
 		}
 		stringBuilder.append("]");
 		return stringBuilder.toString();
+	}
+	
+	private void outOfBounds(int index) {
+		throw new IndexOutOfBoundsException("Index:" + index + ", Size" + size);
+	}
+	
+	private void rangeCheck(int index) {
+		if (index < 0 || index >= size) {
+			outOfBounds(index);
+		}
+	}
+	
+	private void rangeCheckForAdd(int index) {
+		if (index < 0 || index > size) {
+			outOfBounds(index);
+		}
+	}
+	
+	private void ensureCapacity(int capacity) {
+		// 1. 判断容量长度是否比最少容量大
+		int oldCapacity = elements.length;
+		if (oldCapacity >= capacity) return;
+		
+		// 2. 创建新的容量 1.5 倍
+		// 		>> 1 右移一位相当于除以2
+		// 		<< 1 左移一位相当于乘以2
+		int newCapacity = oldCapacity + (oldCapacity >> 1);
+		E[] newElements = (E[])new Object[newCapacity];
+		for (int i = 0; i < size; i++) {
+			newElements[i] = elements[i];
+		}
+		elements = newElements;
+		
+		System.out.println(oldCapacity + "扩容为" + newCapacity);
 	}
 
 }
