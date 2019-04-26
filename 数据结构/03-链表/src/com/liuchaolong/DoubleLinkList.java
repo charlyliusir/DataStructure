@@ -54,17 +54,25 @@ public class DoubleLinkList<E> extends AbstractList<E> {
 	@Override
 	public E remove(int index) {
 		// TODO Auto-generated method stub
-		Node<E> oldNode = first;
-		if (index == 0) {
-			first = oldNode.next;
+		Node<E> node = node(index);
+		Node<E> prev = node.prev;
+		Node<E> next = node.next;
+		
+		if (prev == null) {  // index == 0
+			first = next;
 		}
 		else {
-			Node<E> prev = node(index - 1);
+			prev.next = next;
 		}
 		
-		
-		
-		return null;
+		if (next == null) { // index == size - 1
+			last = prev;
+		}
+		else {
+			next.prev = prev;
+		}
+		size --;
+		return node.element;
 	}
 
 	@Override
